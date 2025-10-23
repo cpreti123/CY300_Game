@@ -16,4 +16,4 @@ class GlockCat(CatCharacters):
         self.hp = 100
         self.damage = 10
         
-        #I get it now, SUPER pushes shit up to the parent class to be used
+        #I get it now, SUPER pushes STUFF up to the parent class to be used
