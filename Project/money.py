@@ -10,7 +10,7 @@ class Money:
         self.settings = sw_game.settings
 
         #starting amount ** add this to setting later but am lazy rn
-        self.amount = 1000
+        self.amount = 100
 
         #font settings
         self.text_color = (30, 30, 30)
