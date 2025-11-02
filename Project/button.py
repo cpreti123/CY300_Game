@@ -29,6 +29,19 @@ class Button:
         self.msg_image_rect.center = self.rect.center
 
 
+    def _position_button(self, x:int, y:int) -> None:
+        '''Positions the button on the screen!'''
+        self.rect.topleft = (x, y)
+        self.msg_image_rect.center = self.rect.center
+
+
+    def _update_color_size_msg(self, a:int, b:int, c:int, x:int, y:int, msg:str = "") -> None:
+        '''Updates the color and size of buttons.'''
+        self.button_color = (a, b, c)
+        self.width, self.height = x, y
+        self.rect = pygame.Rect(self.rect.topleft[0], self.rect.topleft[1], self.width, self.height)
+        self._prep_msg(msg)
+
     def draw_button(self):
         """Draw blank button and then draw message."""
         self.screen.fill(self.button_color, self.rect)

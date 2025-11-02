@@ -7,6 +7,7 @@ from money import Money
 from game_stats import GameStats
 from cat_characters import GlockCat
 from overlay_text import Overlay
+from shop import Shop
 
 
 class CatWar:
@@ -24,8 +25,10 @@ class CatWar:
 
         #load background
         self.background = pygame.image.load("Project/images/game_bg.png").convert()
+        #load elements of game
         self.money = Money(self)
         self.stats = GameStats(self)
+        self.shop = Shop(self)
 
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
@@ -37,35 +40,42 @@ class CatWar:
         self.hover_start_time = 0
         self.hover_duration = 1000 #1 sec :smile:
 
+        #creating play button AND making sure game is not running.
+        self.game_active = False
+        self.play_button = Button(self, "PLAY")
+
 
     def run_game(self):
         while True:
             self._check_events()
-            
-            # Update sprites
-            self.all_sprites.update()
-
-            # Redraw the screen
-            
-            self.screen.blit(self.background, (0, 0))
-            self.all_sprites.draw(self.screen)
-            self.glock_cat.draw_button()
-            self.money.show_money()
-            mouse_pos = pygame.mouse.get_pos()
-            self.check_hover(mouse_pos)
-
-            if self.hover_text:
-                #https://stackoverflow.com/questions/61654510/how-to-use-pygame-time-get-ticks
-                '''I was using time.sleep here but that freezes the screen and that is no bueno'''
-                current_time = pygame.time.get_ticks()
-                if current_time - self.hover_start_time <= self.hover_duration:
-                    overlay = Overlay(self, self.hover_text)
-                    overlay.draw_text()
-                else:
-                    self.hover_text = None  
-
-            pygame.display.flip()
+            if self.game_active:
+                # Update sprites
+                self.all_sprites.update()
+                self.shop._update_shop()
+                mouse_pos = pygame.mouse.get_pos()
+                self.check_hover(mouse_pos)
+                if self.hover_text:
+                    #https://stackoverflow.com/questions/61654510/how-to-use-pygame-time-get-ticks
+                    '''I was using time.sleep here but that freezes the screen and that is no bueno'''
+                    current_time = pygame.time.get_ticks()
+                    if current_time - self.hover_start_time <= self.hover_duration:
+                        overlay = Overlay(self, self.hover_text)
+                        overlay.draw_text()
+                    else:
+                        self.hover_text = None  
+            self._update_screen()
             self.clock.tick(60)
+
+    
+    def _check_play_button(self, mouse_pos):
+        '''Start the game when user presses play.'''
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.game_active:
+            #reset necessary game settings/whatnot
+            self.settings.start_dynamic_settings()
+            ###RESET NECESSARY PARTS HERE###
+            self.all_sprites.empty()
+            self.game_active = True
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
@@ -74,8 +84,11 @@ class CatWar:
                 self._check_keydown_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                self.check_glock_cat(mouse_pos)
-                self.check_hover(mouse_pos)
+                if self.game_active: #make sure game active to click buttons
+                    self.check_glock_cat(mouse_pos)
+                    self.check_hover(mouse_pos)
+                    self.shop._checked_shop_clicked(mouse_pos)
+                self._check_play_button(mouse_pos)
 
 
     def _check_keydown_events(self, event):
@@ -109,12 +122,33 @@ class CatWar:
                 self.hover_start_time = pygame.time.get_ticks()  
                 break
 
-            
     
     def add_glock_cat(self, pos):
         new_glock_cat = GlockCat(pos)
         self.all_sprites.add(new_glock_cat)
+
+    
+    def _update_screen(self):
+        '''Redraw the screen each time through loop!'''
+        if not self.game_active:
+            self.screen.fill(self.settings.bg_start_color)
+            self.play_button.draw_button()
+            #changing button position~!
+            self.play_button._position_button(400, 250)
+        else:
+            # Redraw the screen
+            self.background = pygame.image.load("Project/images/game_bg.png").convert()
+            self.screen.blit(self.background, (0, 0))
+            self.all_sprites.draw(self.screen)
+            self.glock_cat.draw_button()
+            self.money.show_money()
+            self.shop.show_shop()
+
+        #make most recent visible
+        pygame.display.flip()
+
         
+
 
 if __name__ == '__main__':
     game_object = CatWar()
