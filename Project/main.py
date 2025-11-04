@@ -11,6 +11,7 @@ from overlay_text import Overlay
 from shop import Shop
 
 
+
 class CatWar:
     '''holds things for stick war eske game'''
    
@@ -34,7 +35,10 @@ class CatWar:
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
         #creates first Glock Cat Button
-        self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(300, 10))
+        self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(300, 500))
+
+        #creates first biplane cat button
+        self.plane_cat_button = ImageButton(self, "Project/images/biplane_cat.png", pos=(475, 495))
 
         self.glock_cat = None
 
@@ -51,6 +55,9 @@ class CatWar:
         #creating play button AND making sure game is not running.
         self.game_active = False
         self.play_button = Button(self, "PLAY")
+
+        #initialize money update-system
+        self.money.update_money()
 
 
     def run_game(self):
@@ -87,9 +94,11 @@ class CatWar:
                 if self.game_active: #make sure game active to click buttons
                     self.check_glock_cat(mouse_pos)
                     self.check_hover(mouse_pos)
-                    self.shop._checked_shop_clicked(mouse_pos)
+                    self.shop._check_clicked(mouse_pos)
                 self._check_play_button(mouse_pos)
-
+            elif event.type == self.money.timer:
+                #https://runebook.dev/en/articles/pygame/ref/time/pygame.time.set_timer
+                self.money.update_money()
 
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
@@ -188,6 +197,7 @@ class CatWar:
             self.screen.blit(self.background, (0, 0))
             self.all_sprites.draw(self.screen)
             self.glock_cat_button.draw_button()
+            self.plane_cat_button.draw_button()
             self.money.show_money()
             self.shop.show_shop()
 
