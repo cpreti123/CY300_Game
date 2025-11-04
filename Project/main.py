@@ -1,11 +1,12 @@
 import pygame
 import sys
-import time
+import random
 from settings import Settings
 from button import Button
+from imagebutton import ImageButton
 from money import Money
 from game_stats import GameStats
-from cat_characters import GlockCat
+from cat_characters import GlockCat, EnemyCat
 from overlay_text import Overlay
 from shop import Shop
 
@@ -32,13 +33,20 @@ class CatWar:
 
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
-        #creates first Glock Cat
-        self.glock_cat = Button(self, "Glock Cat")
+        #creates first Glock Cat Button
+        self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(300, 10))
+
+        self.glock_cat = None
 
         #text things make cool fade yeah
         self.hover_text = None
         self.hover_start_time = 0
         self.hover_duration = 1000 #1 sec :smile:
+
+        #no cash overlay
+        self.no_cash_showing = False
+        self.no_cash_start = 0
+        self.no_cash_duration = 1000  # 1 second
 
         #creating play button AND making sure game is not running.
         self.game_active = False
@@ -54,15 +62,7 @@ class CatWar:
                 self.shop._update_shop()
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
-                if self.hover_text:
-                    #https://stackoverflow.com/questions/61654510/how-to-use-pygame-time-get-ticks
-                    '''I was using time.sleep here but that freezes the screen and that is no bueno'''
-                    current_time = pygame.time.get_ticks()
-                    if current_time - self.hover_start_time <= self.hover_duration:
-                        overlay = Overlay(self, self.hover_text)
-                        overlay.draw_text()
-                    else:
-                        self.hover_text = None  
+                self.sprite_movement()
             self._update_screen()
             self.clock.tick(60)
 
@@ -95,23 +95,26 @@ class CatWar:
         """Respond to keypresses."""
         if event.key == pygame.K_q:
             sys.exit()
-
+        if event.key == pygame.K_p:
+            self.spawn_enemy()
+            #here so I can spawn enemy cats for testing
+            
 
     def check_glock_cat(self, mouse_pos):
         """spawns glock cat when clicked"""
-        button_clicked = self.glock_cat.rect.collidepoint(mouse_pos)
-        spawn_coords = (100, 450)
+        button_clicked = self.glock_cat_button.rect.collidepoint(mouse_pos)
+        spawn_y = random.randint(400, 550) 
+        spawn_coords = (100, spawn_y)
         if button_clicked and self.money.amount >= 50:
             self.add_glock_cat(spawn_coords)
             self.money.spend_money(50)
         elif button_clicked:
-            response = Overlay(self, "no cash hero")
-            response.draw_text()
-            pygame.display.flip()
-            time.sleep(1)
-            #self.hover_duration = pygame.time.get_ticks() # this is tech for smth else but works here :shrug:
+            self.no_cash_showing = True
+            self.no_cash_start = pygame.time.get_ticks()
 
-    
+
+
+    #not a fan of this rn will rewrite later
     def check_hover(self, mouse_pos):
         '''see cat hp when hover over cat'''
         self.hover_text = None
@@ -124,10 +127,54 @@ class CatWar:
 
     
     def add_glock_cat(self, pos):
-        new_glock_cat = GlockCat(pos)
-        self.all_sprites.add(new_glock_cat)
+        self.glock_cat = GlockCat(pos)
+        self.all_sprites.add(self.glock_cat)
 
-    
+
+    def spawn_enemy(self):
+        y_pos = random.randint(400, 550)  #i gotta mess w/ this range but its cool not having them all ontop of eachother
+        enemy = EnemyCat((self.settings.screen_width, y_pos))
+        self.all_sprites.add(enemy)
+
+
+
+    def sprite_movement(self):
+        '''ik this says movement but its also combat''' #its ez to stop them then fight this way
+        #https://stackoverflow.com/questions/56210758/how-to-create-narrow-collision-detection-between-a-players-melee-weapon-and-an
+        #https://coderslegacy.com/python/pygame-rpg-enemy-ranged-attacks/
+        #https://stackoverflow.com/questions/66624936/pygame-i-want-to-calculate-the-distance-between-the-player-sprite-and-enemy1
+        for cat in self.all_sprites:
+            if not cat._alive:
+                continue
+            move = True
+            stop_range = 100
+            if isinstance(cat, GlockCat):
+                for enemy in self.all_sprites:
+                    if isinstance(enemy, EnemyCat) and enemy._alive:
+                        dx = enemy.rect.centerx - cat.rect.centerx
+                        dy = enemy.rect.centery - cat.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= stop_range:
+                            cat.attack(enemy)
+                            move = False
+                            break
+                if move:
+                    cat.rect.x += 1  
+            elif isinstance(cat, EnemyCat):
+                for friendly in self.all_sprites:
+                    if isinstance(friendly, GlockCat) and friendly._alive:
+                        dx = friendly.rect.centerx - cat.rect.centerx
+                        dy = friendly.rect.centery - cat.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= stop_range:
+                            cat.attack(friendly)
+                            move = False
+                            break
+                if move:
+                    cat.rect.x -= 1  # Move left
+                    #via testing 100 is a good stop point for glock cats
+
+
     def _update_screen(self):
         '''Redraw the screen each time through loop!'''
         if not self.game_active:
@@ -140,9 +187,17 @@ class CatWar:
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
             self.screen.blit(self.background, (0, 0))
             self.all_sprites.draw(self.screen)
-            self.glock_cat.draw_button()
+            self.glock_cat_button.draw_button()
             self.money.show_money()
             self.shop.show_shop()
+
+            # draw "No cash hero" overlay if needed
+            if self.no_cash_showing:
+                overlay = Overlay(self, "No cash hero")
+                overlay.draw_text()
+                current_time = pygame.time.get_ticks()
+                if current_time - self.no_cash_start >= self.no_cash_duration:
+                    self.no_cash_showing = False
 
         #make most recent visible
         pygame.display.flip()
