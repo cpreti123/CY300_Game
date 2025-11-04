@@ -9,6 +9,13 @@ class Settings:
         self.bg_color = (180, 176, 230)
         self.bg_start_color = (137, 67, 69)
 
+        #currency settings
+        self.points = 150
+
+        #money settings
+        self.start_money = 150
+        self.money_time = 50 #money gained over time
+
     
     def start_dynamic_settings(self):
         '''Settings that will change throughout the game.'''
