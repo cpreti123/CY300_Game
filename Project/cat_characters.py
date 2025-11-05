@@ -13,6 +13,7 @@ class CatCharacters(pygame.sprite.Sprite):
             self.last_attack_time = 0
             self.attack_cooldown = 500  
         if current_time - self.last_attack_time >= self.attack_cooldown:
+            #Copilot helped with target._alive condition below!
             if target._alive:
                 target.hp -= self.damage
                 self.is_attacking = True
