@@ -1,4 +1,4 @@
-#could be a sublass but I dont want to figure that out rn have fun >:)
+#could be a sublass
 import pygame
 
 
