@@ -7,7 +7,7 @@ class CatCharacters(pygame.sprite.Sprite):
         self.image = pygame.image.load(img).convert_alpha()
         self.rect = self.image.get_rect(center=pos)
 
-    def attack(self, target):
+    def attack(self, target): #Copilot helped here for setting it up!
         current_time = pygame.time.get_ticks()
         if not hasattr(self, 'last_attack_time'):
             self.last_attack_time = 0
