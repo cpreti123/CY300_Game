@@ -148,7 +148,7 @@ class CatWar:
 
 
 
-    def sprite_movement(self):
+    def sprite_movement(self): #Copilot helped here!
         '''ik this says movement but its also combat''' #its ez to stop them then fight this way
         #https://stackoverflow.com/questions/56210758/how-to-create-narrow-collision-detection-between-a-players-melee-weapon-and-an
         #https://coderslegacy.com/python/pygame-rpg-enemy-ranged-attacks/
