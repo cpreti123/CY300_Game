@@ -26,6 +26,7 @@ class CatWar:
         pygame.display.set_caption("CatWar")
 
         #load background
+        #Used Copilot for downloading background (needed 'convert()')
         self.background = pygame.image.load("Project/images/game_bg.png").convert()
         #load elements of game
         self.money = Money(self)
@@ -195,7 +196,7 @@ class CatWar:
         else:
             # Redraw the screen
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
-            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
             self.all_sprites.draw(self.screen)
             self.glock_cat_button.draw_button()
             self.plane_cat_button.draw_button()
