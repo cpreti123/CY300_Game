@@ -157,6 +157,7 @@ class CatWar:
                 continue
             move = True
             stop_range = 100
+            ###Copilot helped with creating both of these 'isinstance' blocks.
             if isinstance(cat, GlockCat):
                 for enemy in self.all_sprites:
                     if isinstance(enemy, EnemyCat) and enemy._alive:
@@ -169,7 +170,7 @@ class CatWar:
                             break
                 if move:
                     cat.rect.x += 1  
-            elif isinstance(cat, EnemyCat):
+            elif isinstance(cat, EnemyCat): #This one too!
                 for friendly in self.all_sprites:
                     if isinstance(friendly, GlockCat) and friendly._alive:
                         dx = friendly.rect.centerx - cat.rect.centerx
