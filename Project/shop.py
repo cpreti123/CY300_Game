@@ -41,7 +41,7 @@ class Shop:
     def _checked_plane_clicked(self, mouse_pos):
         '''Function to see if plane clicked.'''
         plane_button_clicked = self.plane_cat_button.rect.collidepoint(mouse_pos)
-        if plane_button_clicked and self.points.points >= 100:
+        if plane_button_clicked and self.points.points >= 100 and not self.plane_cat_purchased:
             self.points.points -= 100
             self.points.prep_points_img()
             self.points.show_points()

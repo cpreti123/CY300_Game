@@ -10,11 +10,12 @@ class Settings:
         self.bg_start_color = (137, 67, 69)
 
         #currency settings
-        self.points = 150
+        self.points = 200
 
         #money settings
-        self.start_money = 150
+        self.start_money = 200
         self.money_time = 50 #money gained over time
+        self.speed = 2
 
     
     def start_dynamic_settings(self):

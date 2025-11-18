@@ -1,11 +1,12 @@
 import pygame
 
-class CatCharacters(pygame.sprite.Sprite):
-    '''Overall class for managing cat sprites'''
+class Towers(pygame.sprite.Sprite):
+    '''Overall class for managing tower sprites'''
     def __init__(self, pos, img):
         super().__init__()
         self.image = pygame.image.load(img).convert_alpha()
         self.rect = self.image.get_rect(center=pos)
+
 
     def attack(self, target):
         current_time = pygame.time.get_ticks()
@@ -22,40 +23,28 @@ class CatCharacters(pygame.sprite.Sprite):
                     target._alive = False
                     target.kill()
 
- 
 
-class GlockCat(CatCharacters):
+class FriendlyTower(Towers):
+    friendly_tower_hp = 500
+    friendly_tower_dmg = 20
     def __init__(self, pos):
-        img = "Project/images/cat_glock.png"
-        super().__init__(pos, img)
-        self._alive = True #apparently alive is alr a name of somthign
-        self.airborne = False 
-        self.is_attacked = False
-        self.is_attacking = False
-        self.hp = 100
-        self.damage = 10
-        #I get it now, SUPER pushes STUFF up to the parent class to be used
-
-
-class PlaneCat(CatCharacters):
-    def __init__(self, pos):
-        img = "Project/images/biplane_cat.png"
+        img = "project/images/gem_image.png"
         super().__init__(pos, img)
         self._alive = True 
-        self.airborne = True
         self.is_attacked = False
         self.is_attacking = False
-        self.hp = 150
-        self.damage = 20
+        self.hp = self.friendly_tower_hp
+        self.damage = self.friendly_tower_dmg
 
 
-class EnemyCat(CatCharacters):
+class EnemyTower(Towers):
+    enemy_tower_hp = 500
+    enemy_tower_dmg = 20
     def __init__(self, pos):
-        img = "Project/images/enemy_cat_glock.png" # literally just has red eyebrows (for now...)
+        img = "placeholder_image.txt"
         super().__init__(pos, img)
-        self._alive = True
+        self._alive = True 
         self.is_attacked = False
         self.is_attacking = False
-        self.hp = 100
-        self.damage = 10
-     
+        self.hp = self.enemy_tower_hp
+        self.damage = self.enemy_tower_dmg
