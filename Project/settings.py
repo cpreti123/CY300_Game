@@ -1,8 +1,8 @@
 class Settings:
-    """A class to store all settings for Alien Invasion."""
+    """Class for storing settings for game."""
 
     def __init__(self):
-        """Initialize the game's settings."""
+        """Initialize settings."""
         # Screen settings
         self.screen_width = 900
         self.screen_height = 600
@@ -20,3 +20,4 @@ class Settings:
     
     def start_dynamic_settings(self):
         '''Settings that will change throughout the game.'''
+        #empty rn; will update time permitting

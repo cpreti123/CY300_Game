@@ -27,6 +27,7 @@ class CatWar:
         pygame.display.set_caption("CatWar")
 
         #load background
+        #Used Copilot for downloading background (needed 'convert()')
         self.background = pygame.image.load("Project/images/game_bg.png").convert()
         #load elements of game
         self.money = Money(self)
@@ -190,7 +191,7 @@ class CatWar:
 
 
 
-    def sprite_movement(self):
+    def sprite_movement(self): #Copilot helped here!
         '''ik this says movement but its also combat''' #its ez to stop them then fight this way
         #https://stackoverflow.com/questions/56210758/how-to-create-narrow-collision-detection-between-a-players-melee-weapon-and-an
         #https://coderslegacy.com/python/pygame-rpg-enemy-ranged-attacks/
@@ -201,6 +202,7 @@ class CatWar:
                 continue
             move = True
             stop_range = 100
+            ###Copilot helped with creating both of these 'isinstance' blocks.
             if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat):
                 for enemy in self.all_sprites:
                     if isinstance(enemy, EnemyCat)  and enemy._alive:
@@ -262,7 +264,7 @@ class CatWar:
         else:
             # Redraw the screen
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
-            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
             self.all_sprites.draw(self.screen)
             self.towers.draw(self.screen)
             self.glock_cat_button.draw_button()
