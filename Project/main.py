@@ -6,9 +6,10 @@ from button import Button
 from imagebutton import ImageButton
 from money import Money
 from game_stats import GameStats
-from cat_characters import GlockCat, EnemyCat
+from cat_characters import GlockCat, EnemyCat, PlaneCat
 from overlay_text import Overlay
 from shop import Shop
+from towers import FriendlyTower, EnemyTower
 
 
 
@@ -35,6 +36,11 @@ class CatWar:
 
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
+
+        #tower group
+        self.towers = pygame.sprite.Group()
+
+
         #creates first Glock Cat Button
         self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(300, 500))
 
@@ -42,6 +48,8 @@ class CatWar:
         self.plane_cat_button = ImageButton(self, "Project/images/biplane_cat.png", pos=(475, 495))
 
         self.glock_cat = None
+        self.plane_cat = None
+
 
         #text things make cool fade yeah
         self.hover_text = None
@@ -60,6 +68,10 @@ class CatWar:
         #initialize money update-system
         self.money.update_money()
 
+        #setting init
+        self.settings = Settings()
+
+
 
     def run_game(self):
         while True:
@@ -67,10 +79,12 @@ class CatWar:
             if self.game_active:
                 # Update sprites
                 self.all_sprites.update()
+                self.towers.update()
                 self.shop._update_shop()
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
                 self.sprite_movement()
+                self.tower_handle()
             self._update_screen()
             self.clock.tick(60)
 
@@ -83,7 +97,11 @@ class CatWar:
             self.settings.start_dynamic_settings()
             ###RESET NECESSARY PARTS HERE###
             self.all_sprites.empty()
+            #i added this here because im sure we are going to want to reset it but also it makes sense to spawn it on game start :)
+            self.towers.empty()
+            self.spawn_friendly_tower()
             self.game_active = True
+
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
@@ -94,12 +112,14 @@ class CatWar:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.game_active: #make sure game active to click buttons
                     self.check_glock_cat(mouse_pos)
+                    self.check_plane_cat(mouse_pos)
                     self.check_hover(mouse_pos)
                     self.shop._check_clicked(mouse_pos)
                 self._check_play_button(mouse_pos)
             elif event.type == self.money.timer:
                 #https://runebook.dev/en/articles/pygame/ref/time/pygame.time.set_timer
                 self.money.update_money()
+
 
     def _check_keydown_events(self, event):
         """Respond to keypresses."""
@@ -122,6 +142,18 @@ class CatWar:
             self.no_cash_showing = True
             self.no_cash_start = pygame.time.get_ticks()
 
+    def check_plane_cat(self, mouse_pos):
+        """spawns plane cat when clicked"""
+        button_clicked = self.plane_cat_button.rect.collidepoint(mouse_pos)
+        spawn_y = random.randint(100, 200) 
+        spawn_coords = (100, spawn_y)
+        if button_clicked and self.money.amount >= 100 and self.shop.plane_cat_purchased:
+            self.add_plane_cat(spawn_coords)
+            self.money.spend_money(100)
+        elif button_clicked:
+            self.no_cash_showing = True
+            self.no_cash_start = pygame.time.get_ticks()
+
 
 
     #not a fan of this rn will rewrite later
@@ -140,11 +172,22 @@ class CatWar:
         self.glock_cat = GlockCat(pos)
         self.all_sprites.add(self.glock_cat)
 
+    def add_plane_cat(self, pos):
+        self.plane_cat = PlaneCat(pos)
+        self.all_sprites.add(self.plane_cat)
+
 
     def spawn_enemy(self):
         y_pos = random.randint(400, 550)  #i gotta mess w/ this range but its cool not having them all ontop of eachother
         enemy = EnemyCat((self.settings.screen_width, y_pos))
         self.all_sprites.add(enemy)
+
+
+    def spawn_friendly_tower(self):
+        friendly_tower = FriendlyTower((50, 450))
+        self.towers.add(friendly_tower)
+
+
 
 
 
@@ -153,15 +196,16 @@ class CatWar:
         #https://stackoverflow.com/questions/56210758/how-to-create-narrow-collision-detection-between-a-players-melee-weapon-and-an
         #https://coderslegacy.com/python/pygame-rpg-enemy-ranged-attacks/
         #https://stackoverflow.com/questions/66624936/pygame-i-want-to-calculate-the-distance-between-the-player-sprite-and-enemy1
+        #NEW NEW NEW https://realpython.com/what-does-isinstance-do-in-python/
         for cat in self.all_sprites:
             if not cat._alive:
                 continue
             move = True
             stop_range = 100
             ###Copilot helped with creating both of these 'isinstance' blocks.
-            if isinstance(cat, GlockCat):
+            if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat):
                 for enemy in self.all_sprites:
-                    if isinstance(enemy, EnemyCat) and enemy._alive:
+                    if isinstance(enemy, EnemyCat)  and enemy._alive:
                         dx = enemy.rect.centerx - cat.rect.centerx
                         dy = enemy.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
@@ -170,12 +214,22 @@ class CatWar:
                             move = False
                             break
                 if move:
-                    cat.rect.x += 1  
-            elif isinstance(cat, EnemyCat): #This one too!
+                    cat.rect.x += self.settings.speed 
+            elif isinstance(cat, EnemyCat):
                 for friendly in self.all_sprites:
-                    if isinstance(friendly, GlockCat) and friendly._alive:
+                    #group before check alive
+                    if (isinstance(friendly, GlockCat) or isinstance(friendly, PlaneCat)) and friendly._alive:
                         dx = friendly.rect.centerx - cat.rect.centerx
                         dy = friendly.rect.centery - cat.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= stop_range:
+                            cat.attack(friendly)
+                            move = False
+                            break
+                for towers in self.towers:
+                    if (isinstance(towers, FriendlyTower)) and towers._alive:
+                        dx = friendly.rect.centerx - towers.rect.centerx
+                        dy = friendly.rect.centery - towers.rect.centery
                         distance = (dx**2 + dy**2)**0.5
                         if distance <= stop_range:
                             cat.attack(friendly)
@@ -184,6 +238,20 @@ class CatWar:
                 if move:
                     cat.rect.x -= 1  # Move left
                     #via testing 100 is a good stop point for glock cats
+
+    def tower_handle(self):
+        for towers in self.towers:
+            if not towers._alive:
+                continue
+            if isinstance(towers, FriendlyTower):
+                for enemy in self.all_sprites:
+                    if isinstance(enemy, EnemyCat)  and enemy._alive:
+                        dx = enemy.rect.centerx - towers.rect.centerx
+                        dy = enemy.rect.centery - towers.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= 200:
+                            towers.attack(enemy)
+                            break
 
 
     def _update_screen(self):
@@ -198,6 +266,7 @@ class CatWar:
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
             self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
             self.all_sprites.draw(self.screen)
+            self.towers.draw(self.screen)
             self.glock_cat_button.draw_button()
             self.plane_cat_button.draw_button()
             self.money.show_money()
@@ -216,7 +285,8 @@ class CatWar:
 
         
 
-
+#buff talon
+#nerf jax
 if __name__ == '__main__':
     game_object = CatWar()
     game_object.run_game()
