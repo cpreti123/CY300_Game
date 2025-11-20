@@ -1,9 +1,9 @@
 import pygame.font
-from pygame.sprite import Group
+###NOT USING RN: from pygame.sprite import Group
 from button import Button
 from settings import Settings
 from imagebutton import ImageButton
-from points import Points
+from gems import Gems
 
 class Shop:
     '''A class to represent the shop!'''
@@ -22,7 +22,7 @@ class Shop:
         self.plane_cat_button = Button(self, "Plane Cat ($100)")
         self.plane_cat_purchased = False
         self.prep_characters()
-        self.points = Points(self.sw_game)
+        self.gems = Gems(self.sw_game)
 
     def _update_shop(self):
         '''Updating shop (nothing rn)'''
@@ -41,10 +41,10 @@ class Shop:
     def _checked_plane_clicked(self, mouse_pos):
         '''Function to see if plane clicked.'''
         plane_button_clicked = self.plane_cat_button.rect.collidepoint(mouse_pos)
-        if plane_button_clicked and self.points.points >= 100 and not self.plane_cat_purchased:
-            self.points.points -= 100
-            self.points.prep_points_img()
-            self.points.show_points()
+        if plane_button_clicked and self.gems.gems >= 100 and not self.plane_cat_purchased:
+            self.gems.gems -= 100
+            self.gems.prep_gems_img()
+            self.gems.show_gems()
             self.plane_cat_purchased = True
             self._check_character_status()
 
@@ -86,4 +86,4 @@ class Shop:
             self.background_button.draw_button()
             self.plane_cat.draw_button()
             self.plane_cat_button.draw_button()
-            self.points.show_points()
+            self.gems.show_gems()

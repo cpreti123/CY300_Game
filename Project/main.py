@@ -10,6 +10,7 @@ from cat_characters import GlockCat, EnemyCat, PlaneCat
 from overlay_text import Overlay
 from shop import Shop
 from towers import FriendlyTower, EnemyTower
+from levels import Levels
 
 
 
@@ -33,6 +34,7 @@ class CatWar:
         self.money = Money(self)
         self.stats = GameStats(self)
         self.shop = Shop(self)
+        self.levels = Levels(self)
 
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
@@ -106,6 +108,7 @@ class CatWar:
             self.towers.empty()
             self.spawn_friendly_tower()
             self.game_active = True
+            self.levels.levels_active = True
 
 
     def _check_events(self):
@@ -288,6 +291,7 @@ class CatWar:
             self.plane_cat_button.draw_button()
             self.money.show_money()
             self.shop.show_shop()
+            self.levels.show_levels()
 
             # draw "No cash hero" overlay if needed
             if self.no_cash_showing:
