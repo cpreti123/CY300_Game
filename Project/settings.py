@@ -17,6 +17,15 @@ class Settings:
         self.money_time = 50 #money gained over time
         self.speed = 2
 
+        #attack stuff
+        self.stop_range = 100
+        self.tower_stop_range = 200
+
+        #health stuff
+        self.max_glock_hp = 100
+        self.health_x = 400
+        self.health_y = 250
+
     
     def start_dynamic_settings(self):
         '''Settings that will change throughout the game.'''
