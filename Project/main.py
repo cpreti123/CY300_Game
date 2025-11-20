@@ -170,7 +170,8 @@ class CatWar:
             if isinstance(cats, GlockCat) and cats.rect.collidepoint(mouse_pos):
                 #self.hover_text = f"HP: {cats.hp} Damage: {cats.damage}"
                 #self.hover_start_time = pygame.time.get_ticks()  
-                self.update_health(True, self.glock_cat.hp, self.settings.max_glock_hp)
+                self.update_health(True, cats.hp, self.settings.max_glock_hp)
+                break
             else:
                 self.health_showing = False
 
