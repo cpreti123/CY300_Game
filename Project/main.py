@@ -249,21 +249,7 @@ class CatWar:
                 if move:
                     cat.rect.x -= 1  # Move left
                     #via testing 100 is a good stop point for glock cats
-    '''
-    def tower_handle(self):        ###is this even needed???
-        for towers in self.towers:
-            if not towers._alive:
-                continue
-            if isinstance(towers, FriendlyTower):
-                for enemy in self.all_sprites:
-                    if isinstance(enemy, EnemyCat)  and enemy._alive:
-                        dx = enemy.rect.centerx - towers.rect.centerx
-                        dy = enemy.rect.centery - towers.rect.centery
-                        distance = (dx**2 + dy**2)**0.5
-                        if distance <= self.settings.tower_stop_range:
-                            towers.attack(enemy)
-                            break
-                            '''
+    
     def update_health(self, toggle:bool, hp:int, max_hp:int):
         if toggle:
             self.health_showing = True
