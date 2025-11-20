@@ -41,7 +41,7 @@ class EnemyTower(Towers):
     enemy_tower_hp = 500
     enemy_tower_dmg = 20
     def __init__(self, pos):
-        img = "placeholder_image.txt"
+        img = "project/images/gem_image.png"
         super().__init__(pos, img)
         self._alive = True 
         self.is_attacked = False

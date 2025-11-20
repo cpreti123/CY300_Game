@@ -40,7 +40,8 @@ class CatWar:
         self.all_sprites = pygame.sprite.Group()
 
         #tower group
-        self.towers = pygame.sprite.Group()
+        self.friendly_tower = pygame.sprite.Group()
+        self.enemy_tower = pygame.sprite.Group()
 
 
         #creates first Glock Cat Button
@@ -86,7 +87,8 @@ class CatWar:
             if self.game_active:
                 # Update sprites
                 self.all_sprites.update()
-                self.towers.update()
+                self.friendly_tower.update()
+                self.enemy_tower.update()
                 self.shop._update_shop()
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
@@ -105,8 +107,10 @@ class CatWar:
             ###RESET NECESSARY PARTS HERE###
             self.all_sprites.empty()
             #i added this here because im sure we are going to want to reset it but also it makes sense to spawn it on game start :)
-            self.towers.empty()
+            self.friendly_tower.empty()
+            self.enemy_tower.empty()
             self.spawn_friendly_tower()
+            self.spawn_enemy_tower()
             self.game_active = True
             self.levels.levels_active = True
 
@@ -196,8 +200,12 @@ class CatWar:
 
     def spawn_friendly_tower(self):
         friendly_tower = FriendlyTower((50, 450))
-        self.towers.add(friendly_tower)
+        self.friendly_tower.add(friendly_tower)
 
+    
+    def spawn_enemy_tower(self):
+        enemy_tower = EnemyTower((850, 450))
+        self.enemy_tower.add(enemy_tower)
 
 
 
@@ -223,6 +231,16 @@ class CatWar:
                             cat.attack(enemy)
                             move = False
                             break
+
+                for towers in self.enemy_tower:
+                    if (isinstance(towers, EnemyTower)) and towers._alive:
+                        dx = enemy.rect.centerx - towers.rect.centerx
+                        dy = enemy.rect.centery - towers.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= self.settings.tower_stop_range:
+                            cat.attack(enemy)
+                            move = False
+                            break
                 if move:
                     cat.rect.x += self.settings.speed 
             elif isinstance(cat, EnemyCat):
@@ -237,7 +255,7 @@ class CatWar:
                             move = False
                             break
 
-                for towers in self.towers:
+                for towers in self.friendly_tower:
                     if (isinstance(towers, FriendlyTower)) and towers._alive:
                         dx = friendly.rect.centerx - towers.rect.centerx
                         dy = friendly.rect.centery - towers.rect.centery
@@ -247,7 +265,7 @@ class CatWar:
                             move = False
                             break
                 if move:
-                    cat.rect.x -= 1  # Move left
+                    cat.rect.x -= self.settings.speed  # Move left
                     #via testing 100 is a good stop point for glock cats
     
     def update_health(self, toggle:bool, hp:int, max_hp:int):
@@ -272,7 +290,8 @@ class CatWar:
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
             self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
             self.all_sprites.draw(self.screen)
-            self.towers.draw(self.screen)
+            self.friendly_tower.draw(self.screen)
+            self.enemy_tower.draw(self.screen)
             self.glock_cat_button.draw_button()
             self.plane_cat_button.draw_button()
             self.money.show_money()
