@@ -10,6 +10,7 @@ from cat_characters import GlockCat, EnemyCat, PlaneCat
 from overlay_text import Overlay
 from shop import Shop
 from towers import FriendlyTower, EnemyTower
+from levels import Levels
 
 
 
@@ -33,6 +34,7 @@ class CatWar:
         self.money = Money(self)
         self.stats = GameStats(self)
         self.shop = Shop(self)
+        self.levels = Levels(self)
 
         #nts sprite group add glock cats to this
         self.all_sprites = pygame.sprite.Group()
@@ -106,6 +108,7 @@ class CatWar:
             self.towers.empty()
             self.spawn_friendly_tower()
             self.game_active = True
+            self.levels.levels_active = True
 
 
     def _check_events(self):
@@ -246,21 +249,7 @@ class CatWar:
                 if move:
                     cat.rect.x -= 1  # Move left
                     #via testing 100 is a good stop point for glock cats
-    '''
-    def tower_handle(self):        ###is this even needed???
-        for towers in self.towers:
-            if not towers._alive:
-                continue
-            if isinstance(towers, FriendlyTower):
-                for enemy in self.all_sprites:
-                    if isinstance(enemy, EnemyCat)  and enemy._alive:
-                        dx = enemy.rect.centerx - towers.rect.centerx
-                        dy = enemy.rect.centery - towers.rect.centery
-                        distance = (dx**2 + dy**2)**0.5
-                        if distance <= self.settings.tower_stop_range:
-                            towers.attack(enemy)
-                            break
-                            '''
+    
     def update_health(self, toggle:bool, hp:int, max_hp:int):
         if toggle:
             self.health_showing = True
@@ -288,6 +277,7 @@ class CatWar:
             self.plane_cat_button.draw_button()
             self.money.show_money()
             self.shop.show_shop()
+            self.levels.show_levels()
 
             # draw "No cash hero" overlay if needed
             if self.no_cash_showing:

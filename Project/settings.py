@@ -10,7 +10,7 @@ class Settings:
         self.bg_start_color = (137, 67, 69)
 
         #currency settings
-        self.points = 200
+        self.gems = 200
 
         #money settings
         self.start_money = 200
@@ -26,7 +26,11 @@ class Settings:
         self.health_x = 400
         self.health_y = 250
 
+        #levels stuff
+        self.start_level = 1
+
     
     def start_dynamic_settings(self):
         '''Settings that will change throughout the game.'''
         #empty rn; will update time permitting
+        self.level_increment = 1
