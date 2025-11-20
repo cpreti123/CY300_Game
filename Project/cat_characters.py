@@ -36,6 +36,7 @@ class GlockCat(CatCharacters):
         self.hp = 100
         self.damage = 10
         #I get it now, SUPER pushes STUFF up to the parent class to be used
+        
 
 
 class PlaneCat(CatCharacters):
@@ -59,4 +60,3 @@ class EnemyCat(CatCharacters):
         self.is_attacking = False
         self.hp = 100
         self.damage = 10
-     

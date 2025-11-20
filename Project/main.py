@@ -61,6 +61,11 @@ class CatWar:
         self.no_cash_start = 0
         self.no_cash_duration = 1000  # 1 second
 
+        #health overlay
+        self.health_showing = False
+        self.health_showing_start = 0
+        self.health_showing_duration = 1000
+
         #creating play button AND making sure game is not running.
         self.game_active = False
         self.play_button = Button(self, "PLAY")
@@ -84,7 +89,7 @@ class CatWar:
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
                 self.sprite_movement()
-                self.tower_handle()
+                #self.tower_handle()
             self._update_screen()
             self.clock.tick(60)
 
@@ -163,9 +168,12 @@ class CatWar:
         #https://stackoverflow.com/questions/41349635/how-to-detect-collision-mouse-over-between-the-mouse-and-a-sprite?
         for cats in self.all_sprites:
             if isinstance(cats, GlockCat) and cats.rect.collidepoint(mouse_pos):
-                self.hover_text = f"HP: {cats.hp} Damage: {cats.damage}"
-                self.hover_start_time = pygame.time.get_ticks()  
+                #self.hover_text = f"HP: {cats.hp} Damage: {cats.damage}"
+                #self.hover_start_time = pygame.time.get_ticks()  
+                self.update_health(True, cats.hp, self.settings.max_glock_hp)
                 break
+            else:
+                self.health_showing = False
 
     
     def add_glock_cat(self, pos):
@@ -201,7 +209,6 @@ class CatWar:
             if not cat._alive:
                 continue
             move = True
-            stop_range = 100
             ###Copilot helped with creating both of these 'isinstance' blocks.
             if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat):
                 for enemy in self.all_sprites:
@@ -209,7 +216,7 @@ class CatWar:
                         dx = enemy.rect.centerx - cat.rect.centerx
                         dy = enemy.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= stop_range:
+                        if distance <= self.settings.stop_range:
                             cat.attack(enemy)
                             move = False
                             break
@@ -222,24 +229,25 @@ class CatWar:
                         dx = friendly.rect.centerx - cat.rect.centerx
                         dy = friendly.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= stop_range:
+                        if distance <= self.settings.stop_range:
                             cat.attack(friendly)
                             move = False
                             break
+
                 for towers in self.towers:
                     if (isinstance(towers, FriendlyTower)) and towers._alive:
                         dx = friendly.rect.centerx - towers.rect.centerx
                         dy = friendly.rect.centery - towers.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= stop_range:
+                        if distance <= self.settings.tower_stop_range:
                             cat.attack(friendly)
                             move = False
                             break
                 if move:
                     cat.rect.x -= 1  # Move left
                     #via testing 100 is a good stop point for glock cats
-
-    def tower_handle(self):
+    '''
+    def tower_handle(self):        ###is this even needed???
         for towers in self.towers:
             if not towers._alive:
                 continue
@@ -249,10 +257,19 @@ class CatWar:
                         dx = enemy.rect.centerx - towers.rect.centerx
                         dy = enemy.rect.centery - towers.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= 200:
+                        if distance <= self.settings.tower_stop_range:
                             towers.attack(enemy)
                             break
+                            '''
+    def update_health(self, toggle:bool, hp:int, max_hp:int):
+        if toggle:
+            self.health_showing = True
+        if self.health_showing:
+            self.hp = hp
+            self.max_hp = max_hp
 
+        
+        '''Updates health.'''
 
     def _update_screen(self):
         '''Redraw the screen each time through loop!'''
@@ -279,6 +296,13 @@ class CatWar:
                 current_time = pygame.time.get_ticks()
                 if current_time - self.no_cash_start >= self.no_cash_duration:
                     self.no_cash_showing = False
+            #call for updating health bar
+            if self.health_showing:
+                overlay = Overlay(self, "HEALTH")
+                overlay.draw_health(self.hp, self.max_hp)
+                current_time = pygame.time.get_ticks()
+                if current_time - self.health_showing_start >= self.health_showing_duration:
+                    self.health_showing = False
 
         #make most recent visible
         pygame.display.flip()
