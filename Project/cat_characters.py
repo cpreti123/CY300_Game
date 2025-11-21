@@ -2,11 +2,12 @@ import pygame
 
 class CatCharacters(pygame.sprite.Sprite):
     '''Overall class for managing cat sprites'''
+
     def __init__(self, pos, img):
         super().__init__()
         self.image = pygame.image.load(img).convert_alpha()
         self.rect = self.image.get_rect(center=pos)
-
+        
     def attack(self, target): #Copilot helped here for setting it up!
         current_time = pygame.time.get_ticks()
         if not hasattr(self, 'last_attack_time'):
@@ -22,9 +23,7 @@ class CatCharacters(pygame.sprite.Sprite):
                 if target.hp <= 0:
                     target._alive = False
                     target.kill()
-
  
-
 class GlockCat(CatCharacters):
     def __init__(self, pos):
         img = "Project/images/cat_glock.png"
@@ -37,8 +36,6 @@ class GlockCat(CatCharacters):
         self.damage = 10
         #I get it now, SUPER pushes STUFF up to the parent class to be used
         
-
-
 class PlaneCat(CatCharacters):
     def __init__(self, pos):
         img = "Project/images/biplane_cat.png"

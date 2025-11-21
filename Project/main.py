@@ -11,10 +11,10 @@ from overlay_text import Overlay
 from shop import Shop
 from towers import FriendlyTower, EnemyTower
 from levels import Levels
+from pygame import mixer
 #from pygame import mixer ima do this later
 
 #NEW !! start screen images / UI images from: https://copilot.microsoft.com/shares/DpEcTf5AwJ17rPQWSLjZR & reminded me how to image transparency
-
 
 class CatWar:
     '''holds things for stick war eske game'''
@@ -71,9 +71,24 @@ class CatWar:
         self.health_showing_start = 0
         self.health_showing_duration = 1000
 
+        #bang bang overlay
+        self.bang_showing = False
+        self.bang_showing_start = 0
+        self.bang_showing_duration = 1000
+        self.bang_coords = None
+
         #creating play button AND making sure game is not running.
         self.game_active = False
         self.play_button = ImageButton(self, "Project/images/play_button.png", pos=(10, 0))
+
+        #creating levels section_screen
+        self.show_level_screen = False
+        self.level_number = 0
+        self.level_button1 = Button(self, "Level 1")
+        self.level_button2 = Button(self, "Level 2")
+        self.level_button3 = Button(self, "Level3")
+        self.level_button4 = Button(self, "Level4")
+        self.list_buttons = [self.level_button1, self.level_button2, self.level_button3, self.level_button4]
 
         #initialize money update-system
         self.money.update_money()
@@ -81,11 +96,16 @@ class CatWar:
         #setting init
         self.settings = Settings()
 
+        #music init
+        mixer.init()
+        self.start_screen_music_file = "Project/sounds/start_screen.mp3"
+        self.start_screen_playing = False
+
 
     def run_game(self):
         while True:
             self._check_events()
-            if self.game_active:
+            if self.game_active and not self.show_level_screen:
                 # Update sprites
                 self.all_sprites.update()
                 self.friendly_tower.update()
@@ -94,7 +114,6 @@ class CatWar:
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
                 self.sprite_movement()
-                #self.tower_handle()
             self._update_screen()
             self.clock.tick(60)
 
@@ -113,7 +132,31 @@ class CatWar:
             self.spawn_friendly_tower()
             self.spawn_enemy_tower()
             self.game_active = True
-            self.levels.levels_active = True
+            self.show_level_screen = True
+            if self.start_screen_playing:
+                mixer.music.stop()
+                self.start_screen_playing = False
+
+    
+    def _check_level_button(self, mouse_pos, buttons:list[object]):
+        '''Start the level when the user presses the button.'''
+        for index, button in enumerate(buttons):
+            self.level_number = index + 1
+            button_clicked = button.rect.collidepoint(mouse_pos)
+            if button_clicked and self.game_active and self.show_level_screen:
+                #reset necessary game settings/whatnot
+                self.settings.start_dynamic_settings()
+                ###RESET NECESSARY PARTS HERE###
+                self.all_sprites.empty()
+                #change level based on one selected!!!
+                self.levels.update_level(self.level_number) 
+                #i added this here because im sure we are going to want to reset it but also it makes sense to spawn it on game start :)
+                self.friendly_tower.empty()
+                self.enemy_tower.empty()
+                self.spawn_friendly_tower()
+                self.spawn_enemy_tower()
+                self.show_level_screen = False
+                self.levels.levels_active = True
 
 
     def _check_events(self):
@@ -123,12 +166,15 @@ class CatWar:
                 self._check_keydown_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                if self.game_active: #make sure game active to click buttons
+                if self.game_active and not self.show_level_screen: #make sure game active to click buttons
                     self.check_glock_cat(mouse_pos)
                     self.check_plane_cat(mouse_pos)
                     self.check_hover(mouse_pos)
                     self.shop._check_clicked(mouse_pos)
-                self._check_play_button(mouse_pos)
+                elif self.show_level_screen and self.game_active:
+                    self._check_level_button(mouse_pos, self.list_buttons)
+                else:
+                    self._check_play_button(mouse_pos)
             elif event.type == self.money.timer:
                 #https://runebook.dev/en/articles/pygame/ref/time/pygame.time.set_timer
                 self.money.update_money()
@@ -200,16 +246,21 @@ class CatWar:
         enemy = EnemyCat((self.settings.screen_width, y_pos))
         self.all_sprites.add(enemy)
 
-    
     def spawn_enemy_plane(self):
         y_pos = random.randint(100, 200) 
         enemy = EnemyPlaneCat((self.settings.screen_width, y_pos))
         self.all_sprites.add(enemy)
 
-
     def spawn_friendly_tower(self):
         friendly_tower = FriendlyTower((50, 450))
         self.friendly_tower.add(friendly_tower)
+
+
+    def spawn_enemy_tower(self):
+        enemy_tower = EnemyTower((850, 450))
+        self.enemy_tower.add(enemy_tower)
+
+
 
     
     def spawn_enemy_tower(self):
@@ -234,10 +285,28 @@ class CatWar:
                         dx = enemy.rect.centerx - cat.rect.centerx
                         dy = enemy.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-
-
                         if isinstance(cat, PlaneCat) and distance < 300:
                             cat.attack(enemy)
+                            self.bang_showing = True
+                            self.bang_coords = (cat.rect.centerx, cat.rect.centery)
+                            move = False
+                            break
+                        elif distance <= self.settings.stop_range:
+                            cat.attack(enemy)
+                            self.bang_showing = True
+                            self.bang_coords = (cat.rect.centerx, cat.rect.centery)
+                            move = False
+                            break
+                for towers in self.enemy_tower:
+                    if (isinstance(towers, EnemyTower)) and towers._alive:
+                        dx = towers.rect.centerx - cat.rect.centerx
+                        dy = towers.rect.centery - cat.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= self.settings.tower_stop_range:
+                            cat.attack(towers)
+                            self.bang_showing = True
+                            self.bang_coords = (cat.rect.centerx, cat.rect.centery)
+                            towers.attack(cat)
                             move = False
                             break
 
@@ -267,20 +336,14 @@ class CatWar:
                         dx = friendly.rect.centerx - cat.rect.centerx
                         dy = friendly.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-
-
                         if isinstance(cat, EnemyPlaneCat) and distance < 300:
                             cat.attack(friendly)
                             move = False
                             break
-
-
                         elif distance <= self.settings.stop_range:
                             cat.attack(friendly)
                             move = False
                             break
-
-
                 for towers in self.friendly_tower:
                     if (isinstance(towers, FriendlyTower)) and towers._alive:
                         dx = towers.rect.centerx - cat.rect.centerx
@@ -292,7 +355,7 @@ class CatWar:
                             move = False
                             break
                 if move:
-                    cat.rect.x -= self.settings.speed  # Move left
+                    cat.rect.x -= self.settings.speed # Move left
                     #via testing 100 is a good stop point for glock cats
     
 
@@ -303,12 +366,18 @@ class CatWar:
         if self.health_showing:
             self.hp = hp
             self.max_hp = max_hp
-        
 
     def _update_screen(self):
         mouse_pos = pygame.mouse.get_pos()
         '''Redraw the screen each time through loop!'''
+        mouse_pos = pygame.mouse.get_pos()
         if not self.game_active:
+            #NEW https://www.pygame.org/docs/ref/music.html MUSIC
+            if not self.start_screen_playing:
+                mixer.music.load(self.start_screen_music_file)
+                mixer.music.set_volume(0.3)
+                mixer.music.play(-1)
+                self.start_screen_playing = True
             #self.screen.fill(self.settings.bg_start_color)
             self.inactive_background = pygame.image.load("Project/images/InactiveBG.png").convert()
             self.screen.blit(self.inactive_background, (0, 0))
@@ -319,6 +388,15 @@ class CatWar:
             self.play_button.draw_button()
             #changing button position~!
             self.play_button._position_button(325, 230)
+        elif self.show_level_screen and self.game_active:
+            self.screen.fill(self.settings.bg_start_color2)
+            x, y = 40, 100
+            for index, button in enumerate(self.list_buttons):
+                button.draw_button()
+                button._position_button(x, y)
+                button._update_color_size_msg(0,102,51,150, 75, f'Level {index+1}')
+                x += 200
+            #changing button position~!
         else:
             # Redraw the screen
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
@@ -349,6 +427,14 @@ class CatWar:
                 current_time = pygame.time.get_ticks()
                 if current_time - self.health_showing_start >= self.health_showing_duration:
                     self.health_showing = False
+            #call for showing bang (fighting)
+            if self.bang_showing:
+                overlay = Overlay(self, "BANG!")
+                overlay.bang_bang(self.bang_coords)
+                current_time = pygame.time.get_ticks()
+                if current_time - self.bang_showing_start >= self.bang_showing_duration:
+                    self.bang_showing = False
+
         #make most recent visible
         pygame.display.flip()
 
