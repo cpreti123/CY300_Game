@@ -1,5 +1,2 @@
-The following python packages are required:
-
-import pygame
-import sys
-import random
+###the following packages are required for install (pip install):
+pygame
