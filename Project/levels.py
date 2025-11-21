@@ -17,18 +17,23 @@ class Levels:
         self.levels_active = False
         self.levels_button = Button(self, "LEVELS")
         self.level_num = self.settings.start_level
+        self.updated_level = 0
         self.prep_levels()
-        #self.level_number = self.settings.start_level
+
     
     def prep_levels(self):
         '''Preps the levels.'''
         self.levels_button.draw_button()
         self.levels_button._position_button(350, 50)
-        self.levels_button._update_color_size_msg(0, 204, 102, 200, 50, f'Level {self.level_num}')
+        self.levels_button._update_color_size_msg(0, 204, 102, 200, 50, f'Level {self.updated_level}')
+        #print(self.settings.updated_level)
+
+    def update_level(self, level_num):
+        self.updated_level = level_num
     
     def show_levels(self):
         '''Draw levels and necessary components to screen!'''
-        self.levels_button.draw_button()
         if self.levels_active:
             ##nothing rn
             self.prep_levels()
+            self.levels_button.draw_button()
