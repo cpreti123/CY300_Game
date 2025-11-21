@@ -102,7 +102,6 @@ class CatWar:
         self.start_screen_playing = False
 
 
-
     def run_game(self):
         while True:
             self._check_events()
@@ -263,6 +262,10 @@ class CatWar:
 
 
 
+    
+    def spawn_enemy_tower(self):
+        enemy_tower = EnemyTower((850, 450))
+        self.enemy_tower.add(enemy_tower)
 
 
     def sprite_movement(self): #Copilot helped here!
@@ -306,6 +309,24 @@ class CatWar:
                             towers.attack(cat)
                             move = False
                             break
+
+
+                        elif distance <= self.settings.stop_range:
+                            cat.attack(enemy)
+                            move = False
+                            break
+
+
+                for towers in self.enemy_tower:
+                    if (isinstance(towers, EnemyTower)) and towers._alive:
+                        dx = towers.rect.centerx - cat.rect.centerx
+                        dy = towers.rect.centery - cat.rect.centery
+                        distance = (dx**2 + dy**2)**0.5
+                        if distance <= self.settings.tower_stop_range:
+                            cat.attack(towers)
+                            towers.attack(cat)
+                            move = False
+                            break
                 if move:
                     cat.rect.x += self.settings.speed 
             elif isinstance(cat, EnemyCat) or isinstance(cat, EnemyPlaneCat):
@@ -337,6 +358,7 @@ class CatWar:
                     cat.rect.x -= self.settings.speed # Move left
                     #via testing 100 is a good stop point for glock cats
     
+
     def update_health(self, toggle:bool, hp:int, max_hp:int):
         '''Updates health.'''
         if toggle:
@@ -346,6 +368,7 @@ class CatWar:
             self.max_hp = max_hp
 
     def _update_screen(self):
+        mouse_pos = pygame.mouse.get_pos()
         '''Redraw the screen each time through loop!'''
         mouse_pos = pygame.mouse.get_pos()
         if not self.game_active:
@@ -388,6 +411,7 @@ class CatWar:
             self.money.show_money()
             self.shop.show_shop()
             self.levels.show_levels()
+
 
             # draw "No cash hero" overlay if needed
             if self.no_cash_showing:
