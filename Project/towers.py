@@ -26,9 +26,9 @@ class Towers(pygame.sprite.Sprite):
 
 class FriendlyTower(Towers):
     friendly_tower_hp = 500
-    friendly_tower_dmg = 20
+    friendly_tower_dmg = 5
     def __init__(self, pos):
-        img = "project/images/gem_image.png"
+        img = "project/images/tower_img.png"
         super().__init__(pos, img)
         self._alive = True 
         self.is_attacked = False
@@ -39,9 +39,9 @@ class FriendlyTower(Towers):
 
 class EnemyTower(Towers):
     enemy_tower_hp = 500
-    enemy_tower_dmg = 20
+    enemy_tower_dmg = 10
     def __init__(self, pos):
-        img = "project/images/gem_image.png"
+        img = "project/images/etower_img.png"
         super().__init__(pos, img)
         self._alive = True 
         self.is_attacked = False

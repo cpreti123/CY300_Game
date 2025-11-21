@@ -44,11 +44,11 @@ class PlaneCat(CatCharacters):
         img = "Project/images/biplane_cat.png"
         super().__init__(pos, img)
         self._alive = True 
-        self.airborne = True
         self.is_attacked = False
         self.is_attacking = False
         self.hp = 150
         self.damage = 20
+
 
 
 class EnemyCat(CatCharacters):
@@ -60,3 +60,15 @@ class EnemyCat(CatCharacters):
         self.is_attacking = False
         self.hp = 100
         self.damage = 10
+
+
+class EnemyPlaneCat(CatCharacters):
+    def __init__(self, pos):
+        img = "Project/images/enemy_cat_plane.png" # literally just has red eyebrows (for now...)
+        super().__init__(pos, img)
+        self._alive = True
+        self.is_attacked = False
+        self.is_attacking = False
+        self.hp = 150
+        self.damage = 20
+

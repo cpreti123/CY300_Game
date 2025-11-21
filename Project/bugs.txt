@@ -1,0 +1,2 @@
+1. 11/20 : Money builds while in start screen -> Need to make it wait for game to be active
+2. 11/20 : make cats spawn within the tower limits so they dont walk behind
