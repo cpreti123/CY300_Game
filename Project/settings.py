@@ -7,7 +7,8 @@ class Settings:
         self.screen_width = 900
         self.screen_height = 600
         self.bg_color = (180, 176, 230)
-        self.bg_start_color = (137, 67, 69)
+        #self.bg_start_color = (137, 67, 69)
+        self.bg_start_image = "Project/images/InactiveBG.png"
 
         #currency settings
         self.gems = 200
@@ -20,6 +21,7 @@ class Settings:
         #attack stuff
         self.stop_range = 100
         self.tower_stop_range = 200
+        self.plane_stop_range = 300
 
         #health stuff
         self.max_glock_hp = 100

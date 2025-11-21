@@ -6,12 +6,14 @@ from button import Button
 from imagebutton import ImageButton
 from money import Money
 from game_stats import GameStats
-from cat_characters import GlockCat, EnemyCat, PlaneCat
+from cat_characters import GlockCat, EnemyCat, PlaneCat, EnemyPlaneCat
 from overlay_text import Overlay
 from shop import Shop
 from towers import FriendlyTower, EnemyTower
 from levels import Levels
+#from pygame import mixer ima do this later
 
+#NEW !! start screen images / UI images from: https://copilot.microsoft.com/shares/DpEcTf5AwJ17rPQWSLjZR & reminded me how to image transparency
 
 
 class CatWar:
@@ -71,14 +73,13 @@ class CatWar:
 
         #creating play button AND making sure game is not running.
         self.game_active = False
-        self.play_button = Button(self, "PLAY")
+        self.play_button = ImageButton(self, "Project/images/play_button.png", pos=(10, 0))
 
         #initialize money update-system
         self.money.update_money()
 
         #setting init
         self.settings = Settings()
-
 
 
     def run_game(self):
@@ -139,6 +140,8 @@ class CatWar:
             sys.exit()
         if event.key == pygame.K_p:
             self.spawn_enemy()
+        if event.key == pygame.K_o:
+            self.spawn_enemy_plane()
             #here so I can spawn enemy cats for testing
             
 
@@ -197,6 +200,12 @@ class CatWar:
         enemy = EnemyCat((self.settings.screen_width, y_pos))
         self.all_sprites.add(enemy)
 
+    
+    def spawn_enemy_plane(self):
+        y_pos = random.randint(100, 200) 
+        enemy = EnemyPlaneCat((self.settings.screen_width, y_pos))
+        self.all_sprites.add(enemy)
+
 
     def spawn_friendly_tower(self):
         friendly_tower = FriendlyTower((50, 450))
@@ -208,14 +217,12 @@ class CatWar:
         self.enemy_tower.add(enemy_tower)
 
 
-
-
     def sprite_movement(self): #Copilot helped here!
         '''ik this says movement but its also combat''' #its ez to stop them then fight this way
         #https://stackoverflow.com/questions/56210758/how-to-create-narrow-collision-detection-between-a-players-melee-weapon-and-an
         #https://coderslegacy.com/python/pygame-rpg-enemy-ranged-attacks/
         #https://stackoverflow.com/questions/66624936/pygame-i-want-to-calculate-the-distance-between-the-player-sprite-and-enemy1
-        #NEW NEW NEW https://realpython.com/what-does-isinstance-do-in-python/
+        #NEW https://realpython.com/what-does-isinstance-do-in-python/
         for cat in self.all_sprites:
             if not cat._alive:
                 continue
@@ -223,72 +230,101 @@ class CatWar:
             ###Copilot helped with creating both of these 'isinstance' blocks.
             if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat):
                 for enemy in self.all_sprites:
-                    if isinstance(enemy, EnemyCat)  and enemy._alive:
+                    if (isinstance(enemy, EnemyCat) or isinstance(enemy, EnemyPlaneCat)) and enemy._alive:
                         dx = enemy.rect.centerx - cat.rect.centerx
                         dy = enemy.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= self.settings.stop_range:
+
+
+                        if isinstance(cat, PlaneCat) and distance < 300:
                             cat.attack(enemy)
                             move = False
                             break
 
+
+                        elif distance <= self.settings.stop_range:
+                            cat.attack(enemy)
+                            move = False
+                            break
+
+
                 for towers in self.enemy_tower:
                     if (isinstance(towers, EnemyTower)) and towers._alive:
-                        dx = enemy.rect.centerx - towers.rect.centerx
-                        dy = enemy.rect.centery - towers.rect.centery
+                        dx = towers.rect.centerx - cat.rect.centerx
+                        dy = towers.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
                         if distance <= self.settings.tower_stop_range:
-                            cat.attack(enemy)
+                            cat.attack(towers)
+                            towers.attack(cat)
                             move = False
                             break
                 if move:
                     cat.rect.x += self.settings.speed 
-            elif isinstance(cat, EnemyCat):
+            elif isinstance(cat, EnemyCat) or isinstance(cat, EnemyPlaneCat):
                 for friendly in self.all_sprites:
                     #group before check alive
                     if (isinstance(friendly, GlockCat) or isinstance(friendly, PlaneCat)) and friendly._alive:
                         dx = friendly.rect.centerx - cat.rect.centerx
                         dy = friendly.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if distance <= self.settings.stop_range:
+
+
+                        if isinstance(cat, EnemyPlaneCat) and distance < 300:
                             cat.attack(friendly)
                             move = False
                             break
 
+
+                        elif distance <= self.settings.stop_range:
+                            cat.attack(friendly)
+                            move = False
+                            break
+
+
                 for towers in self.friendly_tower:
                     if (isinstance(towers, FriendlyTower)) and towers._alive:
-                        dx = friendly.rect.centerx - towers.rect.centerx
-                        dy = friendly.rect.centery - towers.rect.centery
+                        dx = towers.rect.centerx - cat.rect.centerx
+                        dy = towers.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
                         if distance <= self.settings.tower_stop_range:
-                            cat.attack(friendly)
+                            cat.attack(towers)
+                            towers.attack(cat)
                             move = False
                             break
                 if move:
                     cat.rect.x -= self.settings.speed  # Move left
                     #via testing 100 is a good stop point for glock cats
     
+
     def update_health(self, toggle:bool, hp:int, max_hp:int):
+        '''Updates health.'''
         if toggle:
             self.health_showing = True
         if self.health_showing:
             self.hp = hp
             self.max_hp = max_hp
-
         
-        '''Updates health.'''
 
     def _update_screen(self):
+        mouse_pos = pygame.mouse.get_pos()
         '''Redraw the screen each time through loop!'''
         if not self.game_active:
-            self.screen.fill(self.settings.bg_start_color)
+            #self.screen.fill(self.settings.bg_start_color)
+            self.inactive_background = pygame.image.load("Project/images/InactiveBG.png").convert()
+            self.screen.blit(self.inactive_background, (0, 0))
+            if self.play_button.rect.collidepoint(mouse_pos):
+                self.play_button.image = pygame.image.load("Project/images/play_button_hovered.png").convert_alpha()
+            else:
+                self.play_button.image = pygame.image.load("Project/images/play_button.png").convert_alpha()
             self.play_button.draw_button()
             #changing button position~!
-            self.play_button._position_button(400, 250)
+            self.play_button._position_button(325, 230)
         else:
             # Redraw the screen
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
+            #self.ui = pygame.image.load("Project/images/test_ui.png").convert_alpha() # to be worked with
             self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
+            #self.screen.blit(self.ui, (0, 0)) tbww
             self.all_sprites.draw(self.screen)
             self.friendly_tower.draw(self.screen)
             self.enemy_tower.draw(self.screen)
@@ -297,6 +333,7 @@ class CatWar:
             self.money.show_money()
             self.shop.show_shop()
             self.levels.show_levels()
+
 
             # draw "No cash hero" overlay if needed
             if self.no_cash_showing:
@@ -312,12 +349,10 @@ class CatWar:
                 current_time = pygame.time.get_ticks()
                 if current_time - self.health_showing_start >= self.health_showing_duration:
                     self.health_showing = False
-
         #make most recent visible
         pygame.display.flip()
 
         
-
 #buff talon
 #nerf jax
 if __name__ == '__main__':
