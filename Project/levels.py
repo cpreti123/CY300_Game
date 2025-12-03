@@ -4,8 +4,12 @@ from settings import Settings
 from imagebutton import ImageButton
 from gems import Gems
 
+
 class Levels:
     '''A class to represent the levels.'''
+    num_glock = 0
+    num_plane = 0
+
 
     def __init__(self, cw_game):
         '''Initialize level attributes and whatnot.'''
@@ -37,3 +41,18 @@ class Levels:
             ##nothing rn
             self.prep_levels()
             self.levels_button.draw_button()
+
+    def run_level(self, difficulty):
+        if difficulty == 1:
+            self.num_glock = 3
+            self.num_plane = 0
+        elif difficulty == 2:
+            self.num_glock = 6
+            self.num_plane = 2
+        elif difficulty == 3:
+            self.num_glock = 10
+            self.num_plane = 5
+        elif difficulty == 4:
+            self.num_glock = 15
+            self.num_plane = 8
+            
