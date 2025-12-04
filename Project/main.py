@@ -66,6 +66,10 @@ class CatWar:
         self.no_cash_start = 0
         self.no_cash_duration = 1000  # 1 second
 
+
+        #spawn delay
+        self.spawn_delay = 1000
+
         #health overlay
         self.health_showing = False
         self.health_showing_start = 0
@@ -157,7 +161,9 @@ class CatWar:
                 self.spawn_enemy_tower()
                 self.show_level_screen = False
                 self.levels.levels_active = True
-
+                self.levels.run_level(self.level_number)
+                self.spawn_enemies()
+                
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
@@ -203,6 +209,7 @@ class CatWar:
             self.no_cash_showing = True
             self.no_cash_start = pygame.time.get_ticks()
 
+
     def check_plane_cat(self, mouse_pos):
         """spawns plane cat when clicked"""
         button_clicked = self.plane_cat_button.rect.collidepoint(mouse_pos)
@@ -214,7 +221,6 @@ class CatWar:
         elif button_clicked:
             self.no_cash_showing = True
             self.no_cash_start = pygame.time.get_ticks()
-
 
 
     #not a fan of this rn will rewrite later
@@ -261,12 +267,16 @@ class CatWar:
         self.enemy_tower.add(enemy_tower)
 
 
-
-    
     def spawn_enemy_tower(self):
         enemy_tower = EnemyTower((850, 450))
         self.enemy_tower.add(enemy_tower)
 
+    
+    def spawn_enemies(self):
+        for enemy_glock in range(self.levels.num_glock):
+            self.spawn_enemy()
+        for enemy_plane in range(self.levels.num_plane):
+            self.spawn_enemy_plane()
 
     def sprite_movement(self): #Copilot helped here!
         '''ik this says movement but its also combat''' #its ez to stop them then fight this way
