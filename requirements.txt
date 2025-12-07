@@ -1,3 +1,2 @@
-Faculty Teaches during trident period 2
-Faculty memer teacher a class in Chauvenet Hall, room 215
-Teaches Maritime Warfare
+####REQUIREMENTS#######
+pip install pygame
