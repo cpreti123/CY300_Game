@@ -1,2 +1,3 @@
-###the following packages are required for install (pip install):
-pygame
+Faculty Teaches during trident period 2
+Faculty memer teacher a class in Chauvenet Hall, room 215
+Teaches Maritime Warfare

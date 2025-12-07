@@ -17,12 +17,12 @@ class Settings:
         #money settings
         self.start_money = 200
         self.money_time = 50 #money gained over time
-        self.speed = 2
+        self.speed = 1
 
         #attack stuff
         self.stop_range = 100
         self.tower_stop_range = 200
-        self.plane_stop_range = 300
+        self.plane_stop_range = 400
 
         #health stuff
         self.max_glock_hp = 100

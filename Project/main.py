@@ -52,6 +52,9 @@ class CatWar:
         #creates first biplane cat button
         self.plane_cat_button = ImageButton(self, "Project/images/biplane_cat.png", pos=(475, 495))
 
+        #render topui
+        top_ui = pygame.image.load
+
         self.glock_cat = None
         self.plane_cat = None
 
@@ -88,10 +91,10 @@ class CatWar:
         #creating levels section_screen
         self.show_level_screen = False
         self.level_number = 0
-        self.level_button1 = Button(self, "Level 1")
-        self.level_button2 = Button(self, "Level 2")
-        self.level_button3 = Button(self, "Level3")
-        self.level_button4 = Button(self, "Level4")
+        self.level_button1 = ImageButton(self, "Project/images/level1_dark.png", pos=(0, 0))
+        self.level_button2 = ImageButton(self, "Project/images/level2_dark.png", pos=(0, 50))
+        self.level_button3 = ImageButton(self, "Project/images/level3_dark.png", pos=(0, 100))
+        self.level_button4 = ImageButton(self, "Project/images/level4_dark.png", pos=(0, 500))
         self.list_buttons = [self.level_button1, self.level_button2, self.level_button3, self.level_button4]
 
         #initialize money update-system
@@ -115,6 +118,7 @@ class CatWar:
                 self.friendly_tower.update()
                 self.enemy_tower.update()
                 self.shop._update_shop()
+                self.check_tower()
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
                 self.sprite_movement()
@@ -137,10 +141,11 @@ class CatWar:
             self.spawn_enemy_tower()
             self.game_active = True
             self.show_level_screen = True
+            '''
             if self.start_screen_playing:
                 mixer.music.stop()
                 self.start_screen_playing = False
-
+            ''' #sir mentioned we should just let this rock
     
     def _check_level_button(self, mouse_pos, buttons:list[object]):
         '''Start the level when the user presses the button.'''
@@ -213,7 +218,7 @@ class CatWar:
     def check_plane_cat(self, mouse_pos):
         """spawns plane cat when clicked"""
         button_clicked = self.plane_cat_button.rect.collidepoint(mouse_pos)
-        spawn_y = random.randint(100, 200) 
+        spawn_y = random.randint(250, 350) 
         spawn_coords = (100, spawn_y)
         if button_clicked and self.money.amount >= 100 and self.shop.plane_cat_purchased:
             self.add_plane_cat(spawn_coords)
@@ -229,7 +234,7 @@ class CatWar:
         self.hover_text = None
         #https://stackoverflow.com/questions/41349635/how-to-detect-collision-mouse-over-between-the-mouse-and-a-sprite?
         for cats in self.all_sprites:
-            if isinstance(cats, GlockCat) and cats.rect.collidepoint(mouse_pos):
+            if (isinstance(cats, GlockCat) or isinstance(cats, PlaneCat)) and cats.rect.collidepoint(mouse_pos):
                 #self.hover_text = f"HP: {cats.hp} Damage: {cats.damage}"
                 #self.hover_start_time = pygame.time.get_ticks()  
                 self.update_health(True, cats.hp, self.settings.max_glock_hp)
@@ -253,7 +258,7 @@ class CatWar:
         self.all_sprites.add(enemy)
 
     def spawn_enemy_plane(self):
-        y_pos = random.randint(100, 200) 
+        y_pos = random.randint(250, 350) 
         enemy = EnemyPlaneCat((self.settings.screen_width, y_pos))
         self.all_sprites.add(enemy)
 
@@ -369,6 +374,15 @@ class CatWar:
                     #via testing 100 is a good stop point for glock cats
     
 
+    def check_tower(self):
+        '''check if the towers are dead so we can reset the game'''
+        if len(self.enemy_tower) == 0: 
+            self.show_level_screen = True
+            self.levels.levels_active = False
+        if len(self.friendly_tower) == 0: 
+            self.show_level_screen = True
+            self.levels.levels_active = False
+
     def update_health(self, toggle:bool, hp:int, max_hp:int):
         '''Updates health.'''
         if toggle:
@@ -395,24 +409,43 @@ class CatWar:
                 self.play_button.image = pygame.image.load("Project/images/play_button_hovered.png").convert_alpha()
             else:
                 self.play_button.image = pygame.image.load("Project/images/play_button.png").convert_alpha()
+                
+            if self.shop.shop_button.rect.collidepoint(mouse_pos):
+                self.shop.shop_button.image = pygame.image.load("Project/images/shop_dark.png").convert_alpha()
+            else:
+                self.shop.shop_button.image = pygame.image.load("Project/images/shop_light.png").convert_alpha()
+
+
             self.play_button.draw_button()
             #changing button position~!
             self.play_button._position_button(325, 230)
         elif self.show_level_screen and self.game_active:
-            self.screen.fill(self.settings.bg_start_color2)
-            x, y = 40, 100
+            #self.screen.fill(self.settings.bg_start_color2)
+            self.level_select = pygame.image.load("Project/images/level_select.png").convert()
+            self.screen.blit(self.level_select, (0, 0))
+            x_init, y_init = 150, 250
+            spacing_x, spacing_y = 200, 150
             for index, button in enumerate(self.list_buttons):
+                row = index // 2
+                col = index % 2
+                x = x_init + col * spacing_x
+                y = y_init + row * spacing_y
+                if index == 3:
+                    x -= 20
+                    y += 5
                 button.draw_button()
                 button._position_button(x, y)
-                button._update_color_size_msg(0,102,51,150, 75, f'Level {index+1}')
-                x += 200
+                #button._update_color_size_msg(0,102,51,150, 75, f'Level {index+1}')
+                
+
             #changing button position~!
         else:
             # Redraw the screen
             self.background = pygame.image.load("Project/images/game_bg.png").convert()
-            #self.ui = pygame.image.load("Project/images/test_ui.png").convert_alpha() # to be worked with
+            #new new
+            self.top_ui = pygame.image.load("Project/images/top_ui_2.png").convert_alpha() # to be worked with
             self.screen.blit(self.background, (0, 0)) #Used Copilot for this line here!
-            #self.screen.blit(self.ui, (0, 0)) tbww
+            self.screen.blit(self.top_ui, (0, -260)) 
             self.all_sprites.draw(self.screen)
             self.friendly_tower.draw(self.screen)
             self.enemy_tower.draw(self.screen)
