@@ -27,8 +27,8 @@ class Money:
         money_str = str(self.amount)
         self.money_image = self.font.render(money_str, True, self.text_color, self.settings.bg_color)
         self.money_rect = self.money_image.get_rect()
-        self.money_rect.right = self.screen_rect.right - 20
-        self.money_rect.top = 20
+        self.money_rect.right = self.screen_rect.right - 380
+        self.money_rect.top = 25
 
 
     def update_money(self):

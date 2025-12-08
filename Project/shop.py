@@ -16,7 +16,7 @@ class Shop:
         self.settings = Settings()
         self.font = pygame.font.SysFont(None, 50)
         self.shop_active = False
-        self.shop_button = Button(self, "SHOP")
+        self.shop_button = ImageButton(self, "Project/images/shop_light.png", pos=(50, 50))
         self.background_button = Button(self, "")
         self.plane_cat = ImageButton(self, "Project/images/biplane_cat.png", pos=(100, 100))
         self.plane_cat_button = Button(self, "Plane Cat ($100)")
@@ -60,8 +60,8 @@ class Shop:
     def prep_shop_button(self):
         '''Preps the shop button.'''
         self.shop_button.draw_button()
-        self.shop_button._position_button(50, 20)
-        self.shop_button._update_color_size_msg(204, 102, 0, 200, 50, "SHOP")
+        self.shop_button._position_button(40, -25)
+        #self.shop_button._update_color_size_msg(204, 102, 0, 200, 50, "SHOP")
 
     def prep_background(self):
         '''Create a "button" for the shop to show.'''
