@@ -1,2 +1,2 @@
-####REQUIREMENTS#######
-pip install pygame
+###the following packages are required for install (pip install):
+pygame
