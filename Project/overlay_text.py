@@ -44,16 +44,18 @@ class Overlay:
     def draw_bang(self):
         self.screen.blit(self.text_image_bang, self.text_image_bang_rect)
     
-    def draw_health(self, hp:int, max_hp:int):
+    def draw_health(self, hp:int, max_hp:int, x:int=400, y:int=250):
         "Draws health for the cat!"
         #https://www.techwithtim.net/tutorials/game-development-with-python/pygame-tutorial/scoring-health-bars
         buffer = 20
-        x = self.settings.health_x
-        y = self.settings.health_y
         if max_hp > 100:
             buffer = 0
         
         ratio = hp / max_hp
+        #trying to fit crazy large health
+        if max_hp > 200:
+            max_hp *= 0.25
+            hp *= 0.25
         pygame.draw.rect(self.screen, "red", (x, y, max_hp + buffer, 20))
         pygame.draw.rect(self.screen, "green", (x, y, (max_hp + buffer) * ratio, 20))
         self.screen.blit(self.text_image, self.text_image_rect)

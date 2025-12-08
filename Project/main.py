@@ -77,6 +77,7 @@ class CatWar:
         self.health_showing = False
         self.health_showing_start = 0
         self.health_showing_duration = 1000
+        self.health_show_towers = False
 
         #bang bang overlay
         self.bang_showing = False
@@ -96,6 +97,19 @@ class CatWar:
         self.level_button3 = ImageButton(self, "Project/images/level3_dark.png", pos=(0, 100))
         self.level_button4 = ImageButton(self, "Project/images/level4_dark.png", pos=(0, 500))
         self.list_buttons = [self.level_button1, self.level_button2, self.level_button3, self.level_button4]
+        #active and complete conditions
+        self.level_button1_active = True
+        self.level_button2_active = False
+        self.level_button3_active = False
+        self.level_button4_active = False
+        self.level1_complete = False
+        self.level2_complete = False
+        self.level3_complete = False
+        self.level4_complete = False
+
+        self.level_update = False
+        self.level_buffer = False
+        self.current_level = 0
 
         #initialize money update-system
         self.money.update_money()
@@ -122,6 +136,13 @@ class CatWar:
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_hover(mouse_pos)
                 self.sprite_movement()
+                self.health_show_towers = True
+                current_time = pygame.time.get_ticks()
+                if self.level_update:
+                    self.level_update = False
+                    self.spawn_enemies()
+            else:
+                self.health_show_towers = False
             self._update_screen()
             self.clock.tick(60)
 
@@ -151,8 +172,17 @@ class CatWar:
         '''Start the level when the user presses the button.'''
         for index, button in enumerate(buttons):
             self.level_number = index + 1
+            active = True
+            if self.level_number == 1 and not self.level_button1_active:
+                active = False
+            if self.level_number == 2 and not self.level_button2_active:
+                active = False
+            if self.level_number == 3 and not self.level_button3_active:
+                active = False
+            if self.level_number == 4 and not self.level_button4_active:
+                active = False
             button_clicked = button.rect.collidepoint(mouse_pos)
-            if button_clicked and self.game_active and self.show_level_screen:
+            if button_clicked and self.game_active and self.show_level_screen and active:
                 #reset necessary game settings/whatnot
                 self.settings.start_dynamic_settings()
                 ###RESET NECESSARY PARTS HERE###
@@ -168,6 +198,7 @@ class CatWar:
                 self.levels.levels_active = True
                 self.levels.run_level(self.level_number)
                 self.spawn_enemies()
+                self.current_level = self.level_number
                 
 
     def _check_events(self):
@@ -189,6 +220,14 @@ class CatWar:
             elif event.type == self.money.timer:
                 #https://runebook.dev/en/articles/pygame/ref/time/pygame.time.set_timer
                 self.money.update_money()
+                if self.level_buffer:#makes sure it doesn't IMMEDIATELY reset (unlucky)
+                    number = random.randint(1,4)
+                    if number == 3:#slows it down a bit
+                        self.level_update = True
+                        self.level_buffer = False
+                else:
+                    self.level_buffer = True
+
 
 
     def _check_keydown_events(self, event):
@@ -278,10 +317,10 @@ class CatWar:
 
     
     def spawn_enemies(self):
-        for enemy_glock in range(self.levels.num_glock):
-            self.spawn_enemy()
-        for enemy_plane in range(self.levels.num_plane):
-            self.spawn_enemy_plane()
+            for enemy_glock in range(self.levels.num_glock):
+                self.spawn_enemy()
+            for enemy_plane in range(self.levels.num_plane):
+                self.spawn_enemy_plane()
 
     def sprite_movement(self): #Copilot helped here!
         '''ik this says movement but its also combat''' #its ez to stop them then fight this way
@@ -379,6 +418,26 @@ class CatWar:
         if len(self.enemy_tower) == 0: 
             self.show_level_screen = True
             self.levels.levels_active = False
+            print(self.current_level)
+            if self.current_level == 1:
+                self.level_button1_active = False
+                self.level1_complete = True
+                self.level_button2_active = True
+                self.money.money_increase = 100
+            if self.current_level == 2:
+                self.level_button2_active = False
+                self.level2_complete = True
+                self.level_button3_active = True
+                self.money.money_increase = 200
+            if self.current_level == 3:
+                self.level_button3_active = False
+                self.level3_complete = True
+                self.level_button4_active = True
+                self.money.money_increase = 300
+            if self.current_level == 1:
+                self.level_button4_active = False
+                self.level4_complete = True
+                self.money.money_increase = 1000
         if len(self.friendly_tower) == 0: 
             self.show_level_screen = True
             self.levels.levels_active = False
@@ -448,7 +507,13 @@ class CatWar:
             self.screen.blit(self.top_ui, (0, -260)) 
             self.all_sprites.draw(self.screen)
             self.friendly_tower.draw(self.screen)
+            for tower in self.friendly_tower:
+                overlay = Overlay(self, "")
+                overlay.draw_health(tower.hp, 500, 20, 350)
             self.enemy_tower.draw(self.screen)
+            for tower in self.enemy_tower:
+                overlay = Overlay(self, "")
+                overlay.draw_health(tower.hp, 500, 750, 350)
             self.glock_cat_button.draw_button()
             self.plane_cat_button.draw_button()
             self.money.show_money()
@@ -470,6 +535,13 @@ class CatWar:
                 current_time = pygame.time.get_ticks()
                 if current_time - self.health_showing_start >= self.health_showing_duration:
                     self.health_showing = False
+            #call for updating tower health bars
+            #if self.health_show_towers:
+               # overlay = Overlay(self, "HEALTH")
+                #overlay.draw_health(self.f, 500, 500, 400)
+               # current_time = pygame.time.get_ticks()
+               # if current_time - self.health_showing_start >= self.#health_showing_duration:
+               #     self.health_showing = False
             #call for showing bang (fighting)
             if self.bang_showing:
                 overlay = Overlay(self, "BANG!")
