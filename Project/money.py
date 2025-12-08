@@ -12,6 +12,7 @@ class Money:
 
         #starting amount ** add this to setting later but am lazy rn
         self.amount = self.settings.start_money
+        self.money_increase = self.settings.money_time
 
         #font settings
         self.text_color = (30, 30, 30)
@@ -35,7 +36,7 @@ class Money:
         '''Updates the money throughout the game.'''
         #https://runebook.dev/en/articles/pygame/ref/time/pygame.time.set_timer
         pygame.time.set_timer(self.timer, 2000)
-        self.add_money(self.settings.money_time)
+        self.add_money(self.money_increase)
 
     def add_money(self, amount):
         '''add money'''

@@ -26,8 +26,8 @@ class Settings:
 
         #health stuff
         self.max_glock_hp = 100
-        self.health_x = 400
-        self.health_y = 250
+        #self.health_x = 400
+        #self.health_y = 250
 
         #levels stuff
         self.start_level = 1

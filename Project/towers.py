@@ -37,6 +37,7 @@ class FriendlyTower(Towers):
         self.damage = self.friendly_tower_dmg
 
 
+
 class EnemyTower(Towers):
     enemy_tower_hp = 500
     enemy_tower_dmg = 10
@@ -48,3 +49,4 @@ class EnemyTower(Towers):
         self.is_attacking = False
         self.hp = self.enemy_tower_hp
         self.damage = self.enemy_tower_dmg
+

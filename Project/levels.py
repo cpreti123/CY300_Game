@@ -21,15 +21,18 @@ class Levels:
         self.levels_active = False
         self.levels_button = Button(self, "LEVELS")
         self.level_num = self.settings.start_level
-        self.updated_level = 0
+        self.updated_level = 1
         self.prep_levels()
+        self.current_time = 0
 
     
     def prep_levels(self):
         '''Preps the levels.'''
-        self.levels_button.draw_button()
-        self.levels_button._position_button(350, 50)
-        self.levels_button._update_color_size_msg(0, 204, 102, 200, 50, f'Level {self.updated_level}')
+        #self.levels_button.draw_button()
+        #self.levels_button._position_button(350, 50)
+        #self.levels_button._update_color_size_msg(0, 204, 102, 200, 50, f'Level {self.updated_level}')
+        self.level_button = ImageButton(self, f"Project/images/level{str(self.updated_level)}_dark.png", pos=(675, -20))
+        
         #print(self.settings.updated_level)
 
     def update_level(self, level_num):
@@ -40,7 +43,7 @@ class Levels:
         if self.levels_active:
             ##nothing rn
             self.prep_levels()
-            self.levels_button.draw_button()
+            self.level_button.draw_button()
 
     def run_level(self, difficulty):
         if difficulty == 1:
@@ -56,3 +59,9 @@ class Levels:
             self.num_glock = 15
             self.num_plane = 8
             
+
+    def level_cycle(self, difficulty):
+        self.current_time = pygame.time.get_ticks()
+        if self.current_time % 1 > 0:
+            self.current_time = 0
+            self.rune_level(difficulty)
