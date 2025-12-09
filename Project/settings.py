@@ -12,10 +12,10 @@ class Settings:
         self.bg_start_color2 = (150, 200, 20)
 
         #currency settings
-        self.gems = 200
+        self.gems = 0
 
         #money settings
-        self.start_money = 200
+        self.start_money = 150
         self.money_time = 50 #money gained over time
         self.speed = 1
 

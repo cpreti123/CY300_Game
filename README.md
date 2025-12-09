@@ -1,7 +1,7 @@
 # Project Title: Cat Wars: The Meow Tale
 
 Authors: Cadet Ketron, Cadet Preti, Cadet Cresci
-Date: Novemeber 20, 2025
+Date: December 9th, 2025
 
 ## Overview
 
@@ -32,9 +32,10 @@ with guns. This game was developed for the CY300 "In Class Project" over the cou
 To run the program:
 
 1. Open a terminal or command prompt.
-2. Navigate to the folder containing the project files.
-3. Type pip install pygame into the command prompt.
-4. Run the program with the following command: python main.py
+2. Git clone the repository.
+3. Navigate to the folder containing the project files.
+4. Install necessary packages with the following command: pip install requirements.txt
+5. Run the program with the following command (Windows): python .\Project\main.py
 
 ## Dependencies
 

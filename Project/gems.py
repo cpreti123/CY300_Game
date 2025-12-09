@@ -21,9 +21,14 @@ class Gems:
         gems_str = str(self.gems)
         self.gems_img = self.font.render(gems_str, True, self.text_color, self.settings.bg_color)
         self.gems_rect = self.gems_img.get_rect()
-        self.gems_rect.right = self.screen_rect.right - 20
-        self.gems_rect.top = 100
-    
+        self.gems_rect.right = self.screen_rect.right - 425
+        self.gems_rect.top = 170
+        
+    def updated_gems(self, amount):
+        '''updates gem amount'''
+        self.gems += amount
+
     def show_gems(self):
         '''Draw to screen.'''
+        self.prep_gems_img()
         self.screen.blit(self.gems_img, self.gems_rect)
