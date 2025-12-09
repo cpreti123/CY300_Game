@@ -46,6 +46,16 @@ class PlaneCat(CatCharacters):
         self.hp = 150
         self.damage = 20
 
+class TankerCat(CatCharacters):
+    def __init__(self, pos):
+        img = "Project/images/tankcat.png"
+        super().__init__(pos, img)
+        self._alive = True 
+        self.is_attacked = False
+        self.is_attacking = False
+        self.hp = 300
+        self.damage = 50
+
 
 
 class EnemyCat(CatCharacters):

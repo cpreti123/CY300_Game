@@ -6,7 +6,7 @@ from button import Button
 from imagebutton import ImageButton
 from money import Money
 from game_stats import GameStats
-from cat_characters import GlockCat, EnemyCat, PlaneCat, EnemyPlaneCat
+from cat_characters import GlockCat, EnemyCat, PlaneCat, EnemyPlaneCat, TankerCat
 from overlay_text import Overlay
 from shop import Shop
 from towers import FriendlyTower, EnemyTower
@@ -47,16 +47,20 @@ class CatWar:
 
 
         #creates first Glock Cat Button
-        self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(300, 500))
+        self.glock_cat_button = ImageButton(self, "Project/images/glock_cat_icon.png", pos=(250, 500))
 
         #creates first biplane cat button
-        self.plane_cat_button = ImageButton(self, "Project/images/biplane_cat.png", pos=(475, 495))
+        self.plane_cat_button = ImageButton(self, "Project/images/biplane_cat_button.png", pos=(410, 495))
+
+        #creates first tanker cat button
+        self.tanker_cat_button = ImageButton(self, "Project/images/tankcat_button.png", pos=(590, 475))
 
         #render topui
         top_ui = pygame.image.load
 
         self.glock_cat = None
         self.plane_cat = None
+        self.tanker_cat = None
 
 
         #text things make cool fade yeah
@@ -68,7 +72,6 @@ class CatWar:
         self.no_cash_showing = False
         self.no_cash_start = 0
         self.no_cash_duration = 1000  # 1 second
-
 
         #spawn delay
         self.spawn_delay = 1000
@@ -93,10 +96,12 @@ class CatWar:
         self.show_level_screen = False
         self.level_number = 0
         self.level_button1 = ImageButton(self, "Project/images/level1_dark.png", pos=(0, 0))
-        self.level_button2 = ImageButton(self, "Project/images/level2_dark.png", pos=(0, 50))
-        self.level_button3 = ImageButton(self, "Project/images/level3_dark.png", pos=(0, 100))
-        self.level_button4 = ImageButton(self, "Project/images/level4_dark.png", pos=(0, 500))
+        self.level_button2 = ImageButton(self, "Project/images/level2_dark_locked.png", pos=(0, 50))
+        self.level_button3 = ImageButton(self, "Project/images/level3_dark_locked.png", pos=(0, 100))
+        self.level_button4 = ImageButton(self, "Project/images/level4_dark_locked.png", pos=(0, 500))
         self.list_buttons = [self.level_button1, self.level_button2, self.level_button3, self.level_button4]
+        self.show_win = False
+        self.win_button = ImageButton(self, "Project/images/win_screen.png", pos=(0, 0))
         #active and complete conditions
         self.level_button1_active = True
         self.level_button2_active = False
@@ -211,10 +216,12 @@ class CatWar:
                 if self.game_active and not self.show_level_screen: #make sure game active to click buttons
                     self.check_glock_cat(mouse_pos)
                     self.check_plane_cat(mouse_pos)
+                    self.check_tanker_cat(mouse_pos)
                     self.check_hover(mouse_pos)
                     self.shop._check_clicked(mouse_pos)
                 elif self.show_level_screen and self.game_active:
                     self._check_level_button(mouse_pos, self.list_buttons)
+                    self.money.amount = self.settings.start_money #makes sure doesn't count up outside gameplay
                 else:
                     self._check_play_button(mouse_pos)
             elif event.type == self.money.timer:
@@ -265,6 +272,18 @@ class CatWar:
         elif button_clicked:
             self.no_cash_showing = True
             self.no_cash_start = pygame.time.get_ticks()
+    
+    def check_tanker_cat(self, mouse_pos):
+        '''Spawns tanker cat when clicked!'''
+        button_clicked = self.tanker_cat_button.rect.collidepoint(mouse_pos)
+        spawn_y = random.randint(400, 550) 
+        spawn_coords = (100, spawn_y)
+        if button_clicked and self.money.amount >= 225 and self.shop.tanker_cat_purchased:
+            self.add_tanker_cat(spawn_coords)
+            self.money.spend_money(225)
+        elif button_clicked:
+            self.no_cash_showing = True
+            self.no_cash_start = pygame.time.get_ticks()
 
 
     #not a fan of this rn will rewrite later
@@ -273,7 +292,7 @@ class CatWar:
         self.hover_text = None
         #https://stackoverflow.com/questions/41349635/how-to-detect-collision-mouse-over-between-the-mouse-and-a-sprite?
         for cats in self.all_sprites:
-            if (isinstance(cats, GlockCat) or isinstance(cats, PlaneCat)) and cats.rect.collidepoint(mouse_pos):
+            if (isinstance(cats, GlockCat) or isinstance(cats, PlaneCat) or isinstance(cats, TankerCat)) and cats.rect.collidepoint(mouse_pos):
                 #self.hover_text = f"HP: {cats.hp} Damage: {cats.damage}"
                 #self.hover_start_time = pygame.time.get_ticks()  
                 self.update_health(True, cats.hp, self.settings.max_glock_hp)
@@ -289,6 +308,10 @@ class CatWar:
     def add_plane_cat(self, pos):
         self.plane_cat = PlaneCat(pos)
         self.all_sprites.add(self.plane_cat)
+
+    def add_tanker_cat(self, pos):
+        self.tanker_cat = TankerCat(pos)
+        self.all_sprites.add(self.tanker_cat)
 
 
     def spawn_enemy(self):
@@ -333,13 +356,13 @@ class CatWar:
                 continue
             move = True
             ###Copilot helped with creating both of these 'isinstance' blocks.
-            if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat):
+            if isinstance(cat, GlockCat) or isinstance(cat, PlaneCat) or isinstance(cat, TankerCat):
                 for enemy in self.all_sprites:
                     if (isinstance(enemy, EnemyCat) or isinstance(enemy, EnemyPlaneCat)) and enemy._alive:
                         dx = enemy.rect.centerx - cat.rect.centerx
                         dy = enemy.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
-                        if isinstance(cat, PlaneCat) and distance < 300:
+                        if (isinstance(cat, PlaneCat) or isinstance(cat, TankerCat)) and distance < 300:
                             cat.attack(enemy)
                             self.bang_showing = True
                             self.bang_coords = (cat.rect.centerx, cat.rect.centery)
@@ -386,7 +409,7 @@ class CatWar:
             elif isinstance(cat, EnemyCat) or isinstance(cat, EnemyPlaneCat):
                 for friendly in self.all_sprites:
                     #group before check alive
-                    if (isinstance(friendly, GlockCat) or isinstance(friendly, PlaneCat)) and friendly._alive:
+                    if (isinstance(friendly, GlockCat) or isinstance(friendly, PlaneCat) or isinstance(friendly, TankerCat)) and friendly._alive:
                         dx = friendly.rect.centerx - cat.rect.centerx
                         dy = friendly.rect.centery - cat.rect.centery
                         distance = (dx**2 + dy**2)**0.5
@@ -418,26 +441,35 @@ class CatWar:
         if len(self.enemy_tower) == 0: 
             self.show_level_screen = True
             self.levels.levels_active = False
-            print(self.current_level)
+            #debugging print(self.current_level)
             if self.current_level == 1:
                 self.level_button1_active = False
                 self.level1_complete = True
                 self.level_button2_active = True
-                self.money.money_increase = 100
+                self.list_buttons[1] = ImageButton(self, "Project/images/level2_dark.png", pos=(0, 50))
+                self.money.money_increase += 50
+                self.shop.gems.updated_gems(100)
             if self.current_level == 2:
                 self.level_button2_active = False
                 self.level2_complete = True
                 self.level_button3_active = True
-                self.money.money_increase = 200
+                self.list_buttons[2] = ImageButton(self, "Project/images/level3_dark.png", pos=(0, 100))
+                self.money.money_increase += 150
+                self.shop.gems.updated_gems(100)
             if self.current_level == 3:
                 self.level_button3_active = False
                 self.level3_complete = True
                 self.level_button4_active = True
-                self.money.money_increase = 300
-            if self.current_level == 1:
+                self.list_buttons[3] = ImageButton(self, "Project/images/level4_dark.png", pos=(0, 500))
+                self.money.money_increase += 200
+                self.shop.gems.updated_gems(100)
+            if self.current_level == 4:
                 self.level_button4_active = False
+                self.level_button1_active = True
                 self.level4_complete = True
-                self.money.money_increase = 1000
+                self.show_win = True
+                self.money.money_increase += 200
+                self.shop.gems.updated_gems(100)
         if len(self.friendly_tower) == 0: 
             self.show_level_screen = True
             self.levels.levels_active = False
@@ -495,7 +527,9 @@ class CatWar:
                 button.draw_button()
                 button._position_button(x, y)
                 #button._update_color_size_msg(0,102,51,150, 75, f'Level {index+1}')
-                
+            if self.show_win:
+                self.win_button.draw_button()
+                self.win_button._position_button(0, 0)
 
             #changing button position~!
         else:
@@ -516,6 +550,7 @@ class CatWar:
                 overlay.draw_health(tower.hp, 500, 750, 350)
             self.glock_cat_button.draw_button()
             self.plane_cat_button.draw_button()
+            self.tanker_cat_button.draw_button()
             self.money.show_money()
             self.shop.show_shop()
             self.levels.show_levels()
