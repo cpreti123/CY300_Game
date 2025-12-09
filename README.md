@@ -49,11 +49,14 @@ installed:
 
 ## Input
 
-The game runs off a user mouse position input.
+The game runs off a user mouse position input. Additionally, to quit the program type 'q'.
 
 ## Output
 
 N/A
+
+## Test Cases
+To run some test cases, input the following command into the main directory: 'python -m pytest .'
 
 ## Contact
 

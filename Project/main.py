@@ -242,9 +242,11 @@ class CatWar:
         if event.key == pygame.K_q:
             sys.exit()
         if event.key == pygame.K_p:
-            self.spawn_enemy()
+            #self.spawn_enemy()
+            pass
         if event.key == pygame.K_o:
-            self.spawn_enemy_plane()
+            #self.spawn_enemy_plane()
+            pass
             #here so I can spawn enemy cats for testing
             
 
